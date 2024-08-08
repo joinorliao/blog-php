@@ -91,4 +91,17 @@ class Post extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Poststatus::class, ['id' => 'status']);
     }
+    public function beforeSave($insert){
+        if(parent::beforeSave($insert)){
+            if($insert){
+                $this->create_time = time();
+                $this->update_time = time();
+            }else{
+                $this->update_time = time();
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

@@ -33,10 +33,6 @@ use yii\widgets\ActiveForm;
             ->dropDownList($PostStatusOptions,
             ['prompt'=>'请选择状态'])?>
 
-    <?= $form->field($model, 'create_time')->textInput() ?>
-
-    <?= $form->field($model, 'update_time')->textInput() ?>
-
     <?= $form->field($model, 'author_id')
                 ->dropDownList($AuthorOptions,
                 ['prompt'=>'请选择作者'])?>
