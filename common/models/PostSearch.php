@@ -11,14 +11,18 @@ use common\models\Post;
  */
 class PostSearch extends Post
 {
+    public function attributes()
+    {
+        return array_merge(parent::attributes(), ['authorName']);
+    }
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'status', 'create_time', 'update_time', 'author_id'], 'integer'],
-            [['title', 'content', 'tags'], 'safe'],
+            [['id', 'status', 'create_time', 'update_time', ], 'integer'],
+            [['title', 'content', 'tags','authorName'], 'safe'],
         ];
     }
 
@@ -40,6 +44,7 @@ class PostSearch extends Post
      */
     public function search($params)
     {
+
         $query = Post::find();
 
         // add conditions that should always apply here
@@ -58,8 +63,8 @@ class PostSearch extends Post
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'status' => $this->status,
+            'post.id' => $this->id,
+            'post.status' => $this->status,
             'create_time' => $this->create_time,
             'update_time' => $this->update_time,
             'author_id' => $this->author_id,
@@ -69,6 +74,8 @@ class PostSearch extends Post
             ->andFilterWhere(['like', 'content', $this->content])
             ->andFilterWhere(['like', 'tags', $this->tags]);
 
+        $query->join('INNER JOIN', 'adminuser', 'post.author_id = adminuser.id');
+        $query->andFilterWhere(['like', 'adminuser.nickname', $this->authorName]);
         return $dataProvider;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Post;
+use common\models\Poststatus;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -18,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Post', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('创建文章', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -27,13 +28,31 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
-            'id',
+            //['class' => 'yii\grid\SerialColumn'],
+            [
+                    'attribute'=>'id',
+                'contentOptions'=>['style'=>'width: 35px;'],
+            ],
             'title',
-            'content:ntext',
+            [
+                    'attribute'=>'authorName',
+                'value'=> 'author.nickname',
+            ],
+            [
+                    'attribute'=>'status',
+                    'value'=>'status0.name',
+                    'filter'=>Poststatus::find()
+                        ->select(['name','id'])
+                        ->orderBy('position')
+                        ->indexBy('id')
+                        ->column(),
+            ],
+            [
+                    'attribute'=>'update_time',
+                    'format'=> ['date','php:Y-m-d H:i:s'],
+
+            ],
             'tags:ntext',
-            'status',
             //'create_time:datetime',
             //'update_time:datetime',
             //'author_id',

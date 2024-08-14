@@ -4,6 +4,7 @@
 /** @var string $content */
 
 use backend\assets\AppAsset;
+use common\models\Comment;
 use common\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
@@ -39,6 +40,7 @@ AppAsset::register($this);
         ['label' => '用户管理', 'url' => ['/user/index']],
         ['label' => '管理员', 'url' => ['/adminuser/index'],],
         ['label' => '评论管理', 'url' => ['/comment/index']],
+        '<li><span class="badge badge-inverse">'.Comment::getPengdingCommentCount().'</span> </li>',
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
