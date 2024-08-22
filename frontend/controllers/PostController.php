@@ -1,20 +1,23 @@
 <?php
 
-namespace backend\controllers;
+namespace frontend\controllers;
 
 use common\models\Comment;
-use common\models\CommentSearch;
+use common\models\Post;
+use common\models\PostSearch;
+use common\models\Tag;
+use common\models\User;
 use Yii;
 use yii\web\Controller;
-use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * CommentController implements the CRUD actions for Comment model.
+ * PostController implements the CRUD actions for Post model.
  */
-class CommentController extends Controller
+class PostController extends Controller
 {
+    public $added=0;
     /**
      * @inheritDoc
      */
@@ -34,23 +37,28 @@ class CommentController extends Controller
     }
 
     /**
-     * Lists all Comment models.
+     * Lists all Post models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new CommentSearch();
+        $tags=Tag::findTagWeights();
+        $recentComments=Comment::findRecentComments();
+
+        $searchModel = new PostSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'tags' => $tags,
+            'recentComments' => $recentComments,
         ]);
     }
 
     /**
-     * Displays a single Comment model.
+     * Displays a single Post model.
      * @param int $id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
@@ -63,13 +71,13 @@ class CommentController extends Controller
     }
 
     /**
-     * Creates a new Comment model.
+     * Creates a new Post model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Comment();
+        $model = new Post();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -85,7 +93,7 @@ class CommentController extends Controller
     }
 
     /**
-     * Updates an existing Comment model.
+     * Updates an existing Post model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
@@ -105,7 +113,7 @@ class CommentController extends Controller
     }
 
     /**
-     * Deletes an existing Comment model.
+     * Deletes an existing Post model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
      * @return \yii\web\Response
@@ -119,29 +127,49 @@ class CommentController extends Controller
     }
 
     /**
-     * Finds the Comment model based on its primary key value.
+     * Finds the Post model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
-     * @return Comment the loaded model
+     * @return Post the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Comment::findOne(['id' => $id])) !== null) {
+        if (($model = Post::findOne(['id' => $id])) !== null) {
             return $model;
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    public function actionApprove($id)
+    protected function actionDetail($id)
     {
-        if(!Yii::$app->user->can('commentAuditor')){
-            throw new ForbiddenHttpException('你没有权限执行该操作！');
-        }
         $model = $this->findModel($id);
-        if($model->approve()){
-            return $this->redirect(['index']);
+        $tags = Tag::findTagWeights();
+        $recentComments = Comment::findRecentComments();
+
+        $userMe = User::findOne(Yii::$app->user->id);
+        $commentModel = new Comment();
+        $commentModel->email = $userMe->email;
+        $commentModel->userid = $userMe->id;
+
+        if($commentModel->load(Yii::$app->request->post()))
+        {
+            $commentModel->status =1 ;
+            $commentModel->postid = $id;
+            if($commentModel->save())
+            {
+                $this->added = 1;
+            }
         }
+
+        return $this->render('detail', [
+            'model' => $model,
+            'tags' => $tags,
+            'recentComments' => $recentComments,
+            'commentModel' => $commentModel,
+            'added' =>$this->added,
+        ]);
+
     }
 }

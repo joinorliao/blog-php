@@ -22,6 +22,7 @@ use yii\web\IdentityInterface;
  * @property integer $created_at
  * @property integer $updated_at
  * @property string $password write-only password
+ * @property Comment[] $comments
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -56,12 +57,31 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
+            [['email'], 'unique'],
+            [['email'], 'required'],
+            [['email'], 'email'],
         ];
     }
 
     /**
      * {@inheritdoc}
      */
+
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'username' => 'Username',
+            'auth_key' => 'Auth Key',
+            'password_hash' => 'Password Hash',
+            'password_reset_token' => 'Password Reset Token',
+            'email' => 'Email',
+            'status' => 'Status',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+            'verification_token' => 'Verification Token',
+        ];
+    }
     public static function findIdentity($id)
     {
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
@@ -209,5 +229,18 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+
+    public function getComments()
+    {
+        return $this->hasMany(Comment::className(), ['userid' => 'id']);
+    }
+
+    public static function allStatus(){
+        return [self::STATUS_ACTIVE=>'正常',self::STATUS_DELETED=>'已删除'];
+    }
+
+    public function getStatusStr(){
+        return $this->status==self::STATUS_ACTIVE?'正常':'已删除';
     }
 }

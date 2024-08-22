@@ -6,6 +6,7 @@
 
 use yii\bootstrap5\ActiveForm;
 use yii\bootstrap5\Html;
+use yii\web\IdentityInterface;
 
 $this->title = 'Login';
 ?>
