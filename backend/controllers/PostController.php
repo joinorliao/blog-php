@@ -4,7 +4,10 @@ namespace backend\controllers;
 
 use common\models\Post;
 use common\models\PostSearch;
+use Yii;
+use yii\filters\AccessControl;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -27,6 +30,21 @@ class PostController extends Controller
                         'delete' => ['POST'],
                     ],
                 ],
+                'access' =>[
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'actions' => ['index','view'],
+                            'allow' => true,
+                            'roles' => ['?'],
+                        ],
+                        [
+                            'actions' => ['index','logout'],
+                            'allow' => true,
+                            'roles' => ['@'],
+                        ],
+                    ],
+                ]
             ]
         );
     }
@@ -67,6 +85,9 @@ class PostController extends Controller
      */
     public function actionCreate()
     {
+        if(!Yii::$app->user->can('createPost')){
+            throw new ForbiddenHttpException('你没有权限执行该操作！');
+        }
         $model = new Post();
 
         if ($this->request->isPost) {
@@ -91,6 +112,9 @@ class PostController extends Controller
      */
     public function actionUpdate($id)
     {
+        if(!Yii::$app->user->can('updatePost')){
+            throw new ForbiddenHttpException('你没有权限执行该操作！');
+        }
         $model = $this->findModel($id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
@@ -111,6 +135,9 @@ class PostController extends Controller
      */
     public function actionDelete($id)
     {
+        if(!Yii::$app->user->can('deletePost')){
+            throw new ForbiddenHttpException('你没有权限执行该操作！');
+        }
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);

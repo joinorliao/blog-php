@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var common\models\Adminuser $model */
+/** @var common\models\Post $model */
 
-$this->title = $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Adminusers', 'url' => ['index']];
+$this->title = $model->title;
+$this->params['breadcrumbs'][] = ['label' => 'Posts', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="adminuser-view">
+<div class="post-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -30,14 +30,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'username',
-            'nickname',
-            'password',
-            'email:email',
-            'profile:ntext',
-            'auth_key',
-            'password_hash',
-            'password_reset_token',
+            'title',
+            'content:ntext',
+            'tags:ntext',
+            'status',
+            'create_time:datetime',
+            'update_time:datetime',
+            'author_id',
         ],
     ]) ?>
 

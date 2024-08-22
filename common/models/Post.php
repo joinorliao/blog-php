@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use common\models\Tag;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "post".
@@ -79,6 +80,12 @@ class Post extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery
      */
+
+    public function getActiveComments()
+    {
+        return $this->hasMany(Comment::class, ['post_id' => 'id'])->where('status=:status',[':status'=>2])
+            ->orderBy('id DESC');
+    }
     public function getComments()
     {
         return $this->hasMany(Comment::class, ['post_id' => 'id']);
@@ -122,4 +129,35 @@ class Post extends \yii\db\ActiveRecord
         parent::afterDelete();
         Tag::updateFrequency($this->tags, '');
     }
+
+    public function getUrl()
+    {
+        return Yii::$app->urlManager->createUrl(
+            ['post/detail','id'=>$this->id,'title'=>$this->title]);
+    }
+
+    public function getBeginning($length=288)
+    {
+        $tmpStr = strip_tags($this->content);
+        $tmpLen = mb_strlen($tmpStr);
+
+        $tmpStr = mb_substr($tmpStr,0,$length,'utf-8');
+        return $tmpStr.($tmpLen>$length?'...':'');
+    }
+
+    public function  getTagLinks()
+    {
+        $links=array();
+        foreach(Tag::stringToarray($this->tags) as $tag)
+        {
+            $links[]=Html::a(Html::encode($tag),array('post/index','PostSearch[tags]'=>$tag));
+        }
+        return $links;
+    }
+
+    public function getCommentCount()
+    {
+        return Comment::find()->where(['post_id'=>$this->id,'status'=>2])->count();
+    }
+
 }
